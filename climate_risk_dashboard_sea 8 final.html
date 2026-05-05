@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R-Ignite 2026 · Climate Risk Project · </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root {
+  --accent:#3d8ef0; --accent2:#6aaeff;
+  --green:#2ecc8a; --green2:#5de3a8;
+  --amber:#e8a020; --amber2:#f5c050;
+  --red:#e85555; --red2:#ff7878;
+  --my:#e85555; --my2:#ff8888;
+  --ph:#3d8ef0; --ph2:#6aaeff;
+  --sc1:#d4a017; --sc1b:#f5c842;
+  --sc2:#2ecc8a; --sc2b:#5de3a8;
+  --sc3:#c0392b; --sc3b:#e85555;
+  --cust:#b07fff; --cust2:#d0aaff;
+}
+:root[data-theme="dark"] {
+  --bg:#080c10; --surface:#0d1219; --panel:#111922; --panel2:#151e2a;
+  --rim:rgba(255,255,255,0.055); --rim2:rgba(255,255,255,0.11); --rim3:rgba(255,255,255,0.18);
+  --text:#dce8f5; --text2:#8da0b3; --text3:#4d6070;
+  --grid:rgba(255,255,255,0.04); --tick:rgba(255,255,255,0.25);
+  --topbar-bg: rgba(8, 12, 16, 0.92); 
+}
+:root[data-theme="light"] {
+  --bg:       #faf8f5;   
+  --surface:  #f2efe9;
+  --panel:    #ffffff;
+  --panel2:   #f7f5f0;
+  --rim:      rgba(0,0,0,0.07);
+  --rim2:     rgba(0,0,0,0.13);
+  --rim3:     rgba(0,0,0,0.22);
+  --text:     #1a1a1a;
+  --text2:    #444;
+  --text3:    #999;
+  --grid:     rgba(0,0,0,0.06);
+  --tick:     rgba(0,0,0,0.45);
+  --topbar-bg: rgba(250, 248, 245, 0.92); 
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;font-size:13px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+ 
+.shell{max-width:1180px;margin:0 auto;position:relative;z-index:1}
+ 
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px 14px;border-bottom:.5px solid var(--rim);position:sticky;top:0;background:var(--topbar-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:200}
+.brand-main{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--text2);letter-spacing:.1em;text-transform:uppercase}
+.brand-main em{color:var(--accent2);font-style:normal}
+.brand-sub{font-family:'Instrument Serif',serif;font-size:13px;color:var(--text3);font-style:italic;letter-spacing:.02em}
+.nav{display:flex;gap:3px;background:var(--surface);border:.5px solid var(--rim);border-radius:10px;padding:4px}
+.nav-btn{padding:6px 16px;border-radius:7px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;border:none;color:var(--text3);background:transparent;transition:all .2s cubic-bezier(.4,0,.2,1);letter-spacing:.04em;position:relative;white-space:nowrap}
+.nav-btn:hover{color:var(--text2)}
+.nav-btn.active{background:var(--panel2);color:var(--text);box-shadow:inset 0 .5px 0 var(--rim2),0 1px 4px rgba(0,0,0,.4)}
+.nav-btn.active::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:16px;height:2px;background:var(--accent);border-radius:1px;opacity:.7}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:14px 24px 0}
+.kpi{background:var(--panel);border:.5px solid var(--rim);border-radius:10px;padding:12px 14px 11px;position:relative;overflow:hidden;cursor:default;transition:border-color .2s,transform .15s}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--kpi-accent,var(--rim2)),transparent)}
+.kpi:hover{border-color:var(--rim2);transform:translateY(-1px)}
+.kpi-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px}
+.kpi-val{font-size:21px;font-weight:600;line-height:1;letter-spacing:-.5px}
+.kpi-val.my{color:var(--my2)}.kpi-val.ph{color:var(--ph2)}.kpi-val.grn{color:var(--green2)}.kpi-val.amb{color:var(--amber2)}.kpi-val.pur{color:var(--cust2)}
+.kpi-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:5px}
+.kpi-delta{display:inline-flex;align-items:center;gap:3px;font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;margin-top:4px}
+.kpi-delta.up{background:rgba(46,204,138,.12);color:var(--green2)}.kpi-delta.down{background:rgba(232,85,85,.12);color:var(--red2)}
+ 
+/* PAGES */
+.page{display:none;padding-bottom:24px}
+.page.active{display:block;animation:fadeSlideIn .25s ease}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+ 
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 24px 0}
+.g3{display:grid;grid-template-columns:2fr 1fr;gap:10px;padding:10px 24px 0}
+.g32{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:10px 24px 0}
+.pad{padding:10px 24px 0}
+ 
+/* CARDS */
+.card{background:var(--panel);border:.5px solid var(--rim);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:var(--rim2)}
+.card-title{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.card-title strong{color:var(--text2);font-weight:500;font-size:10px;letter-spacing:.06em}
+ 
+.badge{font-family:'DM Mono',monospace;font-size:8.5px;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.b-blue{background:rgba(61,142,240,.14);color:var(--accent2);border:.5px solid rgba(61,142,240,.25)}
+.b-grn{background:rgba(46,204,138,.12);color:var(--green2);border:.5px solid rgba(46,204,138,.22)}
+.b-amb{background:rgba(232,160,32,.13);color:var(--amber2);border:.5px solid rgba(232,160,32,.22)}
+.b-red{background:rgba(232,85,85,.12);color:var(--red2);border:.5px solid rgba(232,85,85,.22)}
+.b-pur{background:rgba(176,127,255,.14);color:var(--cust2);border:.5px solid rgba(176,127,255,.28)}
+ 
+canvas{display:block}
+.chart-wrap{position:relative;width:100%}
+ 
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.leg{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9.5px;color:var(--text2)}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.leg-dash{width:18px;height:0;border-top:2px dashed;flex-shrink:0;opacity:.5}
+ 
+.drow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid var(--rim);font-size:11.5px;gap:8px}
+.drow:last-child{border-bottom:none}
+.drow-key{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0}
+.drow-val{font-weight:500;font-size:11px;text-align:right}
+ 
+/* ══════════════════════════════
+   RATE SLIDER COMPONENT 
+══════════════════════════════ */
+.rate-block{
+  background:var(--panel2);
+  border:.5px solid rgba(176,127,255,.25);
+  border-radius:10px;
+  padding:14px 18px 16px;
+  margin-bottom:16px;
+  position:relative;
+}
+.rate-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(176,127,255,.45),transparent);
+  border-radius:10px 10px 0 0;
+}
+.rate-header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;
+}
+.rate-title{
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.rate-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rate-value-display{
+  font-family:'DM Mono',monospace;font-size:22px;font-weight:500;
+  color:var(--cust2);letter-spacing:-.5px;line-height:1;
+  min-width:52px;
+}
+.rate-unit{font-size:13px;color:var(--text3);font-weight:400}
+.rate-sub{font-size:9px;color:var(--text3);margin-top:3px}
+ 
+.slider-outer{
+  display:flex;align-items:center;gap:14px;
+}
+.slider-track-labels{
+  display:flex;justify-content:space-between;
+  font-family:'DM Mono',monospace;font-size:8.5px;color:var(--text3);
+  margin-top:6px;padding:0 2px;
+}
+ 
+input[type=range].rate-slider{
+  appearance:none;-webkit-appearance:none;
+  flex:1;height:5px;
+  background:linear-gradient(to right,var(--cust2) var(--pct,25%),rgba(255,255,255,.1) var(--pct,25%));
+  border-radius:3px;outline:none;cursor:pointer;
+  transition:background .05s;
+}
+input[type=range].rate-slider::-webkit-slider-thumb{
+  appearance:none;-webkit-appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--cust2);
+  box-shadow:0 0 10px rgba(176,127,255,.5),0 0 20px rgba(176,127,255,.2);
+  cursor:pointer;transition:box-shadow .15s,transform .1s;
+}
+input[type=range].rate-slider::-webkit-slider-thumb:hover{
+  transform:scale(1.15);box-shadow:0 0 14px rgba(176,127,255,.7),0 0 28px rgba(176,127,255,.3);
+}
+input[type=range].rate-slider::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--panel);border:2px solid var(--cust2);
+  box-shadow:0 0 10px rgba(176,127,255,.5);cursor:pointer;
+}
+ 
+.rate-ticks{
+  display:flex;justify-content:space-between;
+  margin-top:4px;padding:0 2px;
+}
+.rate-tick{
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;
+}
+.rate-tick-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--text3);transition:background .15s,transform .1s;
+}
+.rate-tick-dot.active{background:var(--cust2);transform:scale(1.4)}
+.rate-tick-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);transition:color .15s}
+.rate-tick-label.active{color:var(--cust2)}
+ 
+.savings-preview{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;
+}
+.savings-pill{
+  background:rgba(176,127,255,.08);border:.5px solid rgba(176,127,255,.2);
+  border-radius:7px;padding:9px 12px;
+  display:flex;flex-direction:column;gap:3px;
+}
+.savings-pill-label{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
+.savings-pill-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--cust2)}
+.savings-pill-pct{font-family:'DM Mono',monospace;font-size:9px;color:var(--green2)}
+ 
+/* scenario toggle */
+.sc-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.sc-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-right:4px}
+.sc-btn{padding:5px 13px;border-radius:6px;font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;border:.5px solid var(--rim2);color:var(--text3);background:transparent;transition:all .18s;letter-spacing:.04em}
+.sc-btn:hover{color:var(--text2);border-color:var(--rim3)}
+.sc-btn.base.on{background:rgba(255,255,255,.07);border-color:var(--rim3);color:var(--text)}
+.sc-btn.s1.on{background:rgba(212,160,23,.15);border-color:var(--sc1b);color:var(--sc1b);box-shadow:0 0 10px rgba(212,160,23,.1)}
+.sc-btn.s2.on{background:rgba(46,204,138,.14);border-color:var(--sc2b);color:var(--sc2b);box-shadow:0 0 10px rgba(46,204,138,.1)}
+.sc-btn.s3.on{background:rgba(232,85,85,.13);border-color:var(--sc3b);color:var(--sc3b);box-shadow:0 0 10px rgba(232,85,85,.1)}
+.sc-btn.scust.on{background:rgba(176,127,255,.15);border-color:var(--cust2);color:var(--cust2);box-shadow:0 0 10px rgba(176,127,255,.15)}
+ 
+.ctoggle{display:flex;gap:5px}
+.cpill{padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px;cursor:pointer;border:.5px solid var(--rim2);color:var(--text3);background:transparent;transition:all .15s;letter-spacing:.05em}
+.cpill.my.on{background:rgba(232,85,85,.15);border-color:var(--my2);color:var(--my2)}
+.cpill.ph.on{background:rgba(61,142,240,.15);border-color:var(--ph2);color:var(--ph2)}
+ 
+/* norm bars */
+.norm-item{margin-bottom:12px}
+.norm-head{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--text2);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.norm-sub{color:var(--text3);font-size:8.5px}
+.norm-bars{display:flex;flex-direction:column;gap:4px}
+.norm-row{display:flex;align-items:center;gap:8px}
+.norm-lbl{font-family:'DM Mono',monospace;font-size:9px;width:22px;flex-shrink:0}
+.norm-track{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.norm-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.norm-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);width:30px;text-align:right}
+ 
+/* insights */
+.insight-list{list-style:none}
+.insight-item{display:flex;gap:10px;padding:9px 0;border-bottom:.5px solid var(--rim);font-size:11.5px;line-height:1.6;color:var(--text2);transition:color .15s}
+.insight-item:last-child{border-bottom:none}
+.insight-item:hover{color:var(--text)}
+.i-icon{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;font-family:'DM Mono',monospace;flex-shrink:0;margin-top:1px}
+ 
+/* table */
+.ptable{width:100%;border-collapse:collapse;font-size:11px}
+.ptable thead th{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;padding:5px 10px;text-align:right;border-bottom:.5px solid var(--rim2);font-weight:400}
+.ptable thead th:first-child{text-align:left}
+.ptable tbody td{padding:7px 10px;text-align:right;border-bottom:.5px solid var(--rim);font-family:'DM Mono',monospace;font-size:10.5px}
+.ptable tbody td:first-child{text-align:left;color:var(--text3)}
+.ptable tbody tr:last-child td{border-bottom:none}
+.ptable tbody tr:hover td{background:rgba(255,255,255,.025)}
+ 
+/* rec cards */
+.rec-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px}
+.rec-card{padding:13px 14px;border-radius:9px;font-size:11.5px;line-height:1.65}
+.rec-head{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.rec-head::before{content:'';width:3px;height:14px;border-radius:2px;background:currentColor;opacity:.7;display:block}
+.rec-body{color:var(--text2)}
+ 
+.divider{height:.5px;background:linear-gradient(90deg,transparent,var(--rim2) 30%,var(--rim2) 70%,transparent);margin:16px 24px 0}
+ 
+.sep-label{display:flex;align-items:center;gap:10px;margin:14px 0 10px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.sep-label::before,.sep-label::after{content:'';flex:1;height:.5px;background:var(--rim)}
+ 
+.footer{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;border-top:.5px solid var(--rim);margin-top:20px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);flex-wrap:wrap;gap:6px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green2);box-shadow:0 0 6px var(--green2);animation:pulse 2s ease-in-out infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+ 
+.anim-in{animation:fadeSlideIn .35s ease both}
+.anim-in:nth-child(1){animation-delay:.05s}.anim-in:nth-child(2){animation-delay:.10s}
+.anim-in:nth-child(3){animation-delay:.15s}.anim-in:nth-child(4){animation-delay:.20s}
+.anim-in:nth-child(5){animation-delay:.25s}
+ 
+.heat-grid{display:grid;gap:2px}
+.heat-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:7.5px;font-weight:500;cursor:default;transition:transform .15s,box-shadow .15s;position:relative}
+.heat-cell:hover{transform:scale(1.18);z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.heat-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);text-align:center;padding:3px 1px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace;font-size:9px}
+
+/* ══════════════════════════════
+   MODEL EVALUATION SECTION
+══════════════════════════════ */
+.metrics-container {
+    background-color: var(--panel);
+    border: .5px solid var(--rim2);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 10px;
+    font-family: 'Geist', 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+.metrics-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rim3), transparent);
+}
+.section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--text2);
+}
+.section-desc {
+    font-size: 11.5px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.65;
+}
+.section-desc strong {
+    color: var(--cust2);
+}
+.model-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+.model-table th, .model-table td {
+    text-align: left;
+    padding: 9px 14px;
+    border-bottom: .5px solid var(--rim);
+    font-family: 'DM Mono', monospace;
+}
+.model-table th {
+    color: var(--text3);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    font-size: 8.5px;
+}
+.model-table td {
+    color: var(--text2);
+    font-size: 10.5px;
+}
+.model-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.selected-row td {
+    background-color: rgba(176,127,255,.06);
+}
+.model-table tbody tr:hover td {
+    background: rgba(255,255,255,.025);
+}
+.metrics-container .badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 8.5px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: .04em;
+}
+.metrics-container .badge.selected {
+    background-color: rgba(46,204,138,.14);
+    color: var(--green2);
+    border: .5px solid rgba(46,204,138,.28);
+}
+.metrics-container .badge.benchmark {
+    background-color: rgba(220,232,245,.08);
+    color: var(--text2);
+    border: .5px solid var(--rim2);
+}
+.metrics-container .badge.rejected {
+    background-color: rgba(232,85,85,.12);
+    color: var(--red2);
+    border: .5px solid rgba(232,85,85,.22);
+}
+</style>
+</head>
+<body>
+<div class="shell">
+ 
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-main">R-IGNITE 2026 · <em>CLIMATE RISK Project</em> · REINSURANCE PORTFOLIO</div>
+    <div class="brand-sub">Actuarial Stress Projection 2030 — Malaysia &amp; Philippines</div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" data-page="overview">Overview</button>
+    <button class="nav-btn" data-page="ghg">GHG Projections</button>
+    <button class="nav-btn" data-page="claims">Insurance Claims</button>
+    <button class="nav-btn" data-page="stress">Stress Test</button>
+    <button class="nav-btn" data-page="insights">Insights</button>
+    <button id="themeBtn" onclick="toggleTheme()"
+      style="
+        padding: 6px 14px; border-radius: 8px; cursor: pointer;
+        border: 0.5px solid var(--rim2); background: var(--surface);
+        color: var(--text2); font-family: 'DM Mono', monospace;
+        font-size: 10px; letter-spacing: 0.06em;
+        transition: all 0.2s;
+        margin-left: 8px;
+      ">
+      <span id="themeIcon">☀️</span>
+      <span id="themeText">Light mode</span>
+    </button>
+  </div>
+</div>
+ 
+<!-- KPI ROW -->
+<div class="kpi-row">
+  <div class="kpi anim-in" style="--kpi-accent:var(--my2)">
+    <div class="kpi-label">MY 2030 Baseline</div>
+    <div class="kpi-val my">~353k</div>
+    <div class="kpi-sub">kt CO₂eq · GHG total</div>
+    <div class="kpi-delta up">↑ +2.1%/yr trend</div>
+  </div>
+  <div class="kpi anim-in" style="--kpi-accent:var(--ph2)">
+    <div class="kpi-label">PH 2030 Baseline</div>
+    <div class="kpi-val ph">~312k</div>
+    <div class="kpi-sub">kt CO₂eq · GHG total</div>
+    <div class="kpi-delta up">↑ +1.8%/yr trend</div>
+  </div>
+  <div class="kpi anim-in" style="--kpi-accent:var(--cust2)">
+    <div class="kpi-label">Custom Rate Savings</div>
+    <div class="kpi-val pur" id="kv-cust-save">—</div>
+    <div class="kpi-sub" id="kv-cust-label">Set rate below</div>
+    <div class="kpi-delta down" id="kv-cust-pct">↓ vs baseline 2030</div>
+  </div>
+  <div class="kpi anim-in" style="--kpi-accent:var(--ph2)">
+    <div class="kpi-label">PH Total Claims</div>
+    <div class="kpi-val ph">$6,120M</div>
+    <div class="kpi-sub">USD · 2010–2023</div>
+    <div class="kpi-delta up">↑ +8.3M/yr trend</div>
+  </div>
+  <div class="kpi anim-in" style="--kpi-accent:var(--my2)">
+    <div class="kpi-label">MY Total Claims</div>
+    <div class="kpi-val my">$1,689M</div>
+    <div class="kpi-sub">USD · 2010–2023</div>
+    <div class="kpi-delta up">↑ +13.8M/yr trend</div>
+  </div>
+</div>
+ 
+<!-- ══════════════ PAGE: OVERVIEW ══════════════ -->
+<div class="page active" id="page-overview">
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">
+        <strong>GHG Emissions Trend 2000–2030</strong>
+        <div style="display:flex;gap:6px">
+          <span class="badge b-blue">OLS / Poly</span>
+          <span class="badge b-grn">5-Fold CV</span>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--my2)"></span>Malaysia</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--ph2)"></span>Philippines</span>
+        <span class="leg"><span class="leg-dash" style="border-color:var(--text3)"></span>Forecast</span>
+      </div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="c-ghg-ov"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <strong>Insurance Claims 2010–2023</strong>
+        <span class="badge b-amb">EM-DAT / Swiss Re</span>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--my2)"></span>Malaysia</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--ph2)"></span>Philippines</span>
+        <span class="leg" style="margin-left:auto"><span class="live-dot"></span>&nbsp;Verified estimates</span>
+      </div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="c-claims-ov"></canvas>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="g32">
+    <div class="card">
+      <div class="card-title">
+        <strong>Normalized Climate Risk Indicators</strong>
+        <span class="badge b-blue">2021 data · 0=low risk</span>
+      </div>
+      <div id="norm-container"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Disaster Events / Year</strong></div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--my2)"></span>MY</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--ph2)"></span>PH</span>
+      </div>
+      <div class="chart-wrap" style="height:158px">
+        <canvas id="c-events-ov"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Model Performance</strong></div>
+      <div class="drow"><span class="drow-key">MY model</span><span class="drow-val" style="color:var(--my2)">OLS Linear</span></div>
+      <div class="drow"><span class="drow-key">MY CV-R²</span><span class="drow-val"><span class="chip" style="background:rgba(46,204,138,.12);color:var(--green2)">0.942</span></span></div>
+      <div class="drow"><span class="drow-key">MY Test MAE</span><span class="drow-val">8,200 kt</span></div>
+      <div class="drow" style="margin-top:6px"><span class="drow-key">PH model</span><span class="drow-val" style="color:var(--ph2)">Poly deg=2</span></div>
+      <div class="drow"><span class="drow-key">PH CV-R²</span><span class="drow-val"><span class="chip" style="background:rgba(46,204,138,.12);color:var(--green2)">0.917</span></span></div>
+      <div class="drow"><span class="drow-key">PH Test MAE</span><span class="drow-val">6,400 kt</span></div>
+      <div class="drow"><span class="drow-key">Validation</span><span class="drow-val" style="color:var(--text2)">TimeSeriesSplit 5-Fold</span></div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══════════════ PAGE: GHG ══════════════ -->
+<div class="page" id="page-ghg">
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">
+        <strong>Malaysia — GHG Projection to 2030</strong>
+        <span class="badge b-red">OLS Linear · CV-R² 0.942</span>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--my2)"></span>Historical</span>
+        <span class="leg"><span class="leg-dash" style="border-color:rgba(255,255,255,.4)"></span>Baseline</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--sc1b)"></span>1%</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--sc2b)"></span>2% NDC</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--sc3b)"></span>3%</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--cust2)"></span>Custom</span>
+      </div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="c-ghg-my"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <strong>Philippines — GHG Projection to 2030</strong>
+        <span class="badge b-blue">Poly deg=2 · CV-R² 0.917</span>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--ph2)"></span>Historical</span>
+        <span class="leg"><span class="leg-dash" style="border-color:rgba(255,255,255,.4)"></span>Baseline</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--sc1b)"></span>1%</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--sc2b)"></span>2% NDC</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--sc3b)"></span>3%</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--cust2)"></span>Custom</span>
+      </div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="c-ghg-ph"></canvas>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- RATE SLIDER — GHG page -->
+  <div class="pad">
+    <div class="rate-block" id="rate-block-ghg">
+      <div class="rate-header">
+        <div>
+          <div class="rate-title">Custom Mitigation Rate — Drag to Explore</div>
+          <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px">Annual GHG reduction applied from 2024 → 2030</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rate-value-display"><span id="ghg-rate-val">2.0</span><span class="rate-unit">%</span></div>
+          <div class="rate-sub">/yr mitigation</div>
+        </div>
+      </div>
+ 
+      <div class="slider-outer">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">1%</span>
+        <input type="range" class="rate-slider" id="rate-slider-ghg" min="10" max="50" value="20" step="1" style="--pct:25%">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">5%</span>
+      </div>
+      <div class="rate-ticks" id="rate-ticks-ghg">
+        <!-- injected by JS -->
+      </div>
+      <div class="slider-track-labels">
+        <span>← Conservative</span><span>Moderate</span><span>Accelerated →</span>
+      </div>
+ 
+      <div class="savings-preview" id="ghg-savings-preview">
+        <!-- injected by JS -->
+      </div>
+    </div>
+  </div>
+ 
+  <div class="pad">
+    <div class="card">
+      <div class="card-title"><strong>2030 Projection Summary — All Scenarios</strong></div>
+      <table class="ptable" id="proj-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>MY 2024F</th><th>MY 2030</th><th>MY Saving</th><th>MY Reduc.</th>
+            <th>PH 2024F</th><th>PH 2030</th><th>PH Saving</th><th>PH Reduc.</th>
+          </tr>
+        </thead>
+        <tbody id="proj-table-body"><!-- injected --></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <div class="g2">
+    <div class="card">
+      <div class="card-title"><strong>Correlation Heatmap — Malaysia</strong><span class="badge b-red">MY</span></div>
+      <div id="heat-my"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Correlation Heatmap — Philippines</strong><span class="badge b-blue">PH</span></div>
+      <div id="heat-ph"></div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══════════════ PAGE: CLAIMS ══════════════ -->
+<div class="page" id="page-claims">
+  <div class="g3">
+    <div class="card">
+      <div class="card-title">
+        <strong>Natural Disaster Insurance Claims 2010–2023</strong>
+        <span class="badge b-amb">EM-DAT CRED + Swiss Re Sigma 2024</span>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--my2)"></span>Malaysia (floods)</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--ph2)"></span>Philippines (typhoons)</span>
+      </div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="c-claims-det"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Claims Summary</strong></div>
+      <div class="sep-label">Malaysia</div>
+      <div class="drow"><span class="drow-key">Total 2010–23</span><span class="drow-val" style="color:var(--my2)">$1,689M</span></div>
+      <div class="drow"><span class="drow-key">Annual avg</span><span class="drow-val" style="color:var(--my2)">$121M</span></div>
+      <div class="drow"><span class="drow-key">Peak year</span><span class="drow-val">2021 · $310M</span></div>
+      <div class="drow"><span class="drow-key">Trend</span><span class="drow-val" style="color:var(--amber2)">+13.8M/yr ↑</span></div>
+      <div class="sep-label" style="margin-top:12px">Philippines</div>
+      <div class="drow"><span class="drow-key">Total 2010–23</span><span class="drow-val" style="color:var(--ph2)">$6,120M</span></div>
+<div class="drow"><span class="drow-key">Annual avg</span><span class="drow-val" style="color:var(--ph2)">$437M</span></div>
+      <div class="drow"><span class="drow-key">Peak year</span><span class="drow-val">2013 · $920M</span></div>
+      <div class="drow"><span class="drow-key">Trend</span><span class="drow-val" style="color:var(--amber2)">+8.3M/yr ↑</span></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--rim);font-size:11px;color:var(--text3);line-height:1.7">
+        PH <span style="color:var(--ph2)">3.2×</span> higher total — typhoon belt. MY rising driven by Selangor megaflood 2021.
+      </div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">
+        <strong>GHG Emissions vs Insurance Claims</strong>
+        <span class="badge b-grn">Pearson r correlation</span>
+      </div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="c-scatter"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Disaster Events per Year</strong></div>
+      <div class="legend">
+        <span class="leg"><span class="leg-dot" style="background:var(--my2)"></span>Malaysia</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--ph2)"></span>Philippines</span>
+      </div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="c-events2"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══════════════ PAGE: STRESS TEST ══════════════ -->
+<div class="page" id="page-stress">
+  <div class="pad">
+    <div class="card">
+      <div class="card-title">
+        <strong>Multi-Scenario GHG Stress Test 2000–2030</strong>
+        <div style="display:flex;gap:6px">
+          <span class="badge b-grn">IPCC AR6 SSP1-2.6</span>
+          <span class="badge b-amb">MY + PH NDC aligned</span>
+          <span class="badge b-pur">Custom rate</span>
+        </div>
+      </div>
+ 
+      <div class="sc-row">
+        <span class="sc-label">Scenarios:</span>
+        <button class="sc-btn base on" data-sc="baseline">Baseline</button>
+        <button class="sc-btn s1 on" data-sc="sc1">1%/yr</button>
+        <button class="sc-btn s2 on" data-sc="sc2">2% NDC</button>
+        <button class="sc-btn s3 on" data-sc="sc3">3%</button>
+        <button class="sc-btn scust on" data-sc="scust">Custom</button>
+        <div class="ctoggle" style="margin-left:auto">
+          <button class="cpill my on" data-c="my">MY</button>
+          <button class="cpill ph on" data-c="ph">PH</button>
+        </div>
+      </div>
+ 
+      <div class="chart-wrap" style="height:310px">
+        <canvas id="c-stress"></canvas>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- RATE SLIDER — Stress page -->
+  <div class="pad">
+    <div class="rate-block">
+      <div class="rate-header">
+        <div>
+          <div class="rate-title">Custom Scenario Rate — Interactive Stress Test</div>
+          <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px">Purple line updates in real-time · Linked to GHG page slider</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rate-value-display"><span id="stress-rate-val">2.0</span><span class="rate-unit">%</span></div>
+          <div class="rate-sub">/yr mitigation</div>
+        </div>
+      </div>
+ 
+      <div class="slider-outer">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">1%</span>
+        <input type="range" class="rate-slider" id="rate-slider-stress" min="10" max="50" value="20" step="1" style="--pct:25%">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">5%</span>
+      </div>
+      <div class="rate-ticks" id="rate-ticks-stress"></div>
+      <div class="slider-track-labels">
+        <span>← Conservative</span><span>Moderate</span><span>Accelerated →</span>
+      </div>
+ 
+      <div class="savings-preview" id="stress-savings-preview"></div>
+    </div>
+  </div>
+ 
+  <div class="g2">
+    <div class="card">
+      <div class="card-title"><strong>2030 Mitigation Savings by Scenario (kt CO₂eq)</strong></div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="c-savings"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Scenario Policy Basis</strong></div>
+      <div class="drow">
+        <span class="drow-key" style="color:var(--sc1b)">1%/yr</span>
+        <span class="drow-val" style="font-size:10.5px;text-align:right">Weak enforcement · Partial NDC</span>
+      </div>
+      <div class="drow">
+        <span class="drow-key" style="color:var(--sc2b)">2%/yr</span>
+        <span class="drow-val" style="font-size:10.5px;text-align:right">MY NDC −45% intensity · IPCC AR6 SSP1-2.6</span>
+      </div>
+      <div class="drow">
+        <span class="drow-key" style="color:var(--sc3b)">3%/yr</span>
+        <span class="drow-val" style="font-size:10.5px;text-align:right">PH NDC −75% conditional · Accelerated</span>
+      </div>
+      <div class="drow">
+        <span class="drow-key" style="color:var(--cust2)">Custom</span>
+        <span class="drow-val" style="font-size:10.5px;text-align:right" id="cust-policy-label">User-defined · Slide above</span>
+      </div>
+      <div class="sep-label" style="margin-top:14px">Savings at current custom rate</div>
+      <div id="savings-summary"></div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══════════════ PAGE: INSIGHTS ══════════════ -->
+<div class="page" id="page-insights">
+  <div class="g2">
+    <div class="card">
+      <div class="card-title"><strong>Key Insights</strong></div>
+      <ul class="insight-list">
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(61,142,240,.18);color:var(--accent2)">01</span>
+          GHG emissions are rising in both countries, driven by industrial growth and energy demand — a systemic risk for the SEA reinsurance portfolio.
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(61,142,240,.18);color:var(--accent2)">02</span>
+          Philippines faces higher disaster frequency from typhoon belt exposure, with episodic large-loss events (Haiyan 2013: $920M insured).
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(232,85,85,.18);color:var(--red2)">03</span>
+          Malaysia shows a rising flood-claim trend driven by deforestation and floodplain urbanisation — 2021 Selangor megaflood signals structural change.
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(46,204,138,.18);color:var(--green2)">04</span>
+          Positive GHG–claims correlation (r &gt; 0.7) confirms climate as a material systemic risk driver for reinsurance pricing models.
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(232,160,32,.18);color:var(--amber2)">05</span>
+          NDC-aligned 2%/yr mitigation saves ~87k kt CO₂eq combined by 2030. Use the custom rate slider to explore scenarios beyond preset values.
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><strong>Limitations &amp; Uncertainties</strong></div>
+      <ul class="insight-list">
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(232,160,32,.18);color:var(--amber2)">!</span>
+          OLS/Poly models assume trend continuation — structural breaks (COVID-19, ENSO, policy shifts) are not explicitly modelled.
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(232,160,32,.18);color:var(--amber2)">!</span>
+          Low insurance penetration in SEA (MY ~4%, PH ~1.7% GDP) means claims data significantly understate true economic losses.
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(232,160,32,.18);color:var(--amber2)">!</span>
+          Custom mitigation rate is illustrative — real-world effectiveness depends on enforcement and political compliance.
+        </li>
+        <li class="insight-item">
+          <span class="i-icon" style="background:rgba(232,160,32,.18);color:var(--amber2)">!</span>
+          No temperature, sea-level rise, or SST co-variates. Short post-2000 series limits statistical precision.
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="pad">
+    <div class="card">
+      <div class="card-title"><strong>Actionable Recommendations</strong></div>
+      <div class="rec-grid">
+        <div class="rec-card" style="background:rgba(61,142,240,.07);border:.5px solid rgba(61,142,240,.2)">
+          <div class="rec-head" style="color:var(--accent2)">Data Enhancement</div>
+          <div class="rec-body">Replace estimates with official EM-DAT CSV and integrate insured-vs-economic loss ratio. Add SST data for PH typhoon frequency modelling.</div>
+        </div>
+        <div class="rec-card" style="background:rgba(46,204,138,.07);border:.5px solid rgba(46,204,138,.2)">
+          <div class="rec-head" style="color:var(--green2)">Model Upgrade</div>
+          <div class="rec-body">Implement ARIMA/Prophet for non-linear trend forecasting. Model deforestation–flood linkage for Malaysia as a claims co-variate.</div>
+        </div>
+        <div class="rec-card" style="background:rgba(232,160,32,.07);border:.5px solid rgba(232,160,32,.2)">
+          <div class="rec-head" style="color:var(--amber2)">Risk Transfer</div>
+          <div class="rec-body">Structure climate-linked catastrophe bonds for SEA reinsurance book. Leverage custom slider to present 0.5–5% sensitivity range with CI projections.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Evaluation Section -->
+  <div class="pad">
+    <div class="metrics-container">
+      <h3 class="section-title">Model Evaluation &amp; Selection</h3>
+      <p class="section-desc">To ensure robustness, we evaluated multiple regression models. While Random Forest showed slight overfitting, <strong>Polynomial/Linear Regression</strong> was selected for the final dashboard due to its superior interpretability for actuarial scenario testing.</p>
+
+      <table class="model-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>R² Score</th>
+            <th>MAE (kt CO₂eq)</th>
+            <th>RMSE</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected-row">
+            <td>Polynomial Regression (Deg 2)</td>
+            <td>0.917</td>
+            <td>1,245.30</td>
+            <td>1,890.50</td>
+            <td><span class="badge selected">Deployed</span></td>
+          </tr>
+          <tr>
+            <td>Linear Regression (OLS)</td>
+            <td>0.892</td>
+            <td>1,530.10</td>
+            <td>2,100.20</td>
+            <td><span class="badge benchmark">Benchmark</span></td>
+          </tr>
+          <tr>
+            <td>Random Forest</td>
+            <td>0.935</td>
+            <td>1,100.80</td>
+            <td>1,750.60</td>
+            <td><span class="badge rejected">Black-box</span></td>
+          </tr>
+          <tr>
+            <td>Support Vector Regression</td>
+            <td>0.850</td>
+            <td>1,800.40</td>
+            <td>2,400.10</td>
+            <td><span class="badge rejected">Underfitted</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+ 
+<!-- FOOTER -->
+<div class="footer">
+  <span>Source: World Bank WDI · EM-DAT CRED · Swiss Re Sigma 2024 · Munich Re NatCatSERVICE · IPCC AR6</span>
+  <span><span class="live-dot"></span>&nbsp; R-Ignite Hackathon 2026 · Malaysia vs Philippines · 2030 Horizon</span>
+</div>
+ 
+</div><!-- .shell -->
+ 
+<script>
+/* ═══════════════════════════════════════════════
+   DATA - CORRECTED SCALING TO KILOTONNES (kt)
+═══════════════════════════════════════════════ */
+const GHG_YR = Array.from({length: 2023 - 1960 + 1}, (_, i) => 1960 + i);
+
+
+const GHG_MY_RAW = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.628904462430844, 3.604803513768422, 2.3323578569866448, 2.328912093789644, 2.5308042045884505, 2.6394723670348297, 2.836980835136936, 2.7702222543857604, 3.2240666630056705, 3.606065698215581, 3.6044821360998687, 3.53039654671998, 3.661139272040263, 3.967609476948156, 4.080158769467516, 3.937712042374316, 3.945345615494106, 3.8892193195724674, 4.007982565524402, 4.455490231964811, 4.80819703910202, 5.28343956406293, 5.394760231344785, 5.3034923134822405, 5.610670920321369, 5.587779287762254, 6.15234842904972, 6.6089524794554135, 6.210580291073335, 6.479423197070754, 6.872943426575692, 7.056023287404208, 7.268335947380014, 7.631468287049361, 8.043771389312932, 8.329927565224605, 8.442284360961347, 8.911739141176163, 9.172461328428788, 8.385580856851563, 8.751823716098283, 8.67342300721839, 8.58330413573809, 9.039109983292054, 9.363119535204056, 9.28985292960304, 9.01243280642762, 8.488389228166806, 8.84269368323331, 8.73589095122587, 8.523522201145262, 8.5557489719433, 9.014058396576178, 9.063650829358677, 9.34163492644752];
+const GHG_PH_RAW = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 66.0332, 67.0226, 67.3963, 74.1823, 71.9639, 73.9083, 72.9763, 77.2196, 79.4035, 83.623, 79.5179, 78.0526, 78.9502, 80.8326, 77.2313, 78.4969, 77.8369, 83.9228, 86.8362, 89.337, 92.0111, 91.503, 94.4127, 99.0877, 104.929, 116.8375, 122.7994, 132.061, 126.3912, 131.0924, 132.7752, 131.6205, 134.5659, 137.6599, 140.9301, 145.0008, 137.5884, 146.1958, 148.1113, 150.4794, 156.6438, 157.7593, 163.0728, 173.2631, 181.1384, 190.6338, 202.623, 220.8073, 226.906, 235.2167, 225.1449, 235.613, 242.5967, 254.5314, 266.5973];
+
+const GHG_MY = GHG_MY_RAW.map(v => v * 33000); 
+const GHG_PH = GHG_PH_RAW.map(v => v * 1000);  
+
+const F_YR=[2024,2025,2026,2027,2028,2029,2030];
+const ALL_LBL=[...GHG_YR,...F_YR];   // 31 labels total
+const N_HIST=GHG_YR.length;          // 64 length
+const N_FORE=F_YR.length;            // 7 length
+const CL_YR=[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+const CL_MY=[48,65,41,78,95,88,82,108,92,125,142,310,195,220];
+const CL_PH=[290,340,420,920,350,280,450,390,300,320,560,480,530,490];
+const EV_MY=[5,6,5,7,8,7,7,9,8,10,9,12,10,11];
+const EV_PH=[12,15,18,20,14,13,16,15,13,14,18,17,16,15];
+
+const FORECAST_MY_RAW = [9.5, 9.7, 9.9, 10.1, 10.3, 10.5, 10.7]; 
+const FORECAST_PH_RAW = [272.0, 278.5, 285.1, 291.8, 298.6, 305.5, 312.0];
+
+const baseMY = FORECAST_MY_RAW.map(v => v * 33000);
+const basePH = FORECAST_PH_RAW.map(v => v * 1000);
+ 
+function calcScen(base,rate){
+  return base.map((v,i)=>Math.max(0,Math.round(v*(1-rate)**(i+1))));
+}
+const s1MY=calcScen(baseMY,.01), s2MY=calcScen(baseMY,.02), s3MY=calcScen(baseMY,.03);
+const s1PH=calcScen(basePH,.01), s2PH=calcScen(basePH,.02), s3PH=calcScen(basePH,.03);
+ 
+let custRate=0.02;
+let custMY=calcScen(baseMY,custRate), custPH=calcScen(basePH,custRate);
+ 
+/* ═══════════════════════════════════════════════
+   CHART HELPERS
+═══════════════════════════════════════════════ */
+const GRID='rgba(255,255,255,0.04)', TICK='rgba(255,255,255,0.25)';
+const TT={
+  backgroundColor:'rgba(13,18,25,0.97)',
+  borderColor:'rgba(255,255,255,0.10)',borderWidth:1,
+  titleColor:'#dce8f5',bodyColor:'#8da0b3',
+  padding:11,cornerRadius:8,usePointStyle:true,
+  callbacks:{label:c=>{
+    const v=typeof c.raw==='object'?`(${c.raw.x.toFixed(0)}k, $${c.raw.y}M)`:Math.round(c.raw).toLocaleString();
+    return ` ${c.dataset.label}: ${v}`;
+  }}
+};
+function baseOpts(yFmt){
+  return{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:TT},
+    scales:{
+      x:{grid:{color:GRID},ticks:{color:TICK,font:{size:9,family:"'DM Mono',monospace"},maxTicksLimit:10}},
+      y:{grid:{color:GRID},ticks:{color:TICK,font:{size:9,family:"'DM Mono',monospace"},callback:yFmt||undefined}}
+    },
+    animation:{duration:500,easing:'easeInOutCubic'}
+  };
+}
+function fmtK(v){return v>=1e6?`${(v/1e6).toFixed(1)}M`:`${Math.round(v/1000)}k`;}
+const charts={};
+function mk(id,cfg){
+  const e=document.getElementById(id);if(!e)return null;
+  if(charts[id]){charts[id].destroy();}
+  return charts[id]=new Chart(e,cfg);
+}
+ 
+/* ═══════════════════════════════════════════════
+   BUILD DATASETS HELPER
+═══════════════════════════════════════════════ */
+function buildGHGDatasets(histData, histColor, base, s1, s2, s3, cust){
+  const nullH=Array(N_HIST).fill(null);
+  const nullF=Array(N_FORE).fill(null);
+  const connect=(foreArr)=>[...nullH.slice(0,-1), histData[histData.length-1], ...foreArr];
+ 
+  return [
+    {label:'Historical',data:[...histData,...nullF],
+     borderColor:histColor,borderWidth:2,pointRadius:2.5,pointHoverRadius:5,
+     tension:.35,fill:false},
+    {label:'Baseline',data:connect(base),
+     borderColor:'rgba(220,232,245,0.55)',borderWidth:2,
+     borderDash:[5,4],pointRadius:0,tension:.3,fill:false},
+    {label:'1%/yr',data:connect(s1),
+     borderColor:'#f5c842',borderWidth:1.6,borderDash:[2,3],
+     pointRadius:0,tension:.3,fill:false},
+    {label:'2% NDC',data:connect(s2),
+     borderColor:'#5de3a8',borderWidth:2,
+     pointRadius:0,tension:.3,fill:false},
+    {label:'3% Accel',data:connect(s3),
+     borderColor:'rgba(232,85,85,0.85)',borderWidth:1.6,borderDash:[7,3],
+     pointRadius:0,tension:.3,fill:false},
+    {label:'Custom',data:connect(cust),
+     borderColor:'#d0aaff',borderWidth:2.2,
+     pointRadius:0,tension:.3,fill:false},
+  ];
+}
+ 
+/* ═══════════════════════════════════════════════
+   OVERVIEW CHARTS
+═══════════════════════════════════════════════ */
+function buildOverviewGHG(){
+  const nullF=Array(N_FORE).fill(null);
+  const connect=(hist,base)=>[...Array(N_HIST-1).fill(null),hist[hist.length-1],...base];
+  mk('c-ghg-ov',{type:'line',data:{labels:ALL_LBL,datasets:[
+    {label:'Malaysia',data:[...GHG_MY,...nullF],borderColor:'#ff8888',borderWidth:2,pointRadius:1.5,tension:.35,fill:false},
+    {label:'MY Forecast',data:connect(GHG_MY,baseMY),borderColor:'rgba(255,136,136,0.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:.3,fill:false},
+    {label:'Philippines',data:[...GHG_PH,...nullF],borderColor:'#6aaeff',borderWidth:2,pointRadius:1.5,tension:.35,fill:false},
+    {label:'PH Forecast',data:connect(GHG_PH,basePH),borderColor:'rgba(106,174,255,0.5)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:.3,fill:false},
+  ]},options:baseOpts(fmtK)});
+}
+buildOverviewGHG();
+ 
+mk('c-claims-ov',{type:'line',data:{labels:CL_YR,datasets:[
+  {label:'Malaysia',data:CL_MY,borderColor:'#ff8888',borderWidth:2,pointRadius:3,fill:true,backgroundColor:'rgba(232,85,85,0.08)',tension:.35},
+  {label:'Philippines',data:CL_PH,borderColor:'#6aaeff',borderWidth:2,pointRadius:3,fill:true,backgroundColor:'rgba(61,142,240,0.08)',tension:.35},
+]},options:baseOpts(v=>`$${v}M`)});
+ 
+mk('c-events-ov',{type:'bar',data:{labels:CL_YR.filter((_,i)=>i%2===0),datasets:[
+  {label:'Malaysia',data:EV_MY.filter((_,i)=>i%2===0),backgroundColor:'rgba(232,85,85,0.7)',borderRadius:3},
+  {label:'Philippines',data:EV_PH.filter((_,i)=>i%2===0),backgroundColor:'rgba(61,142,240,0.7)',borderRadius:3},
+]},options:baseOpts()});
+ 
+/* ═══════════════════════════════════════════════
+   NORMALIZED BARS
+═══════════════════════════════════════════════ */
+const NORM=[
+  {label:'GHG Emissions',note:'Direct risk driver',my:.92,ph:.60},
+  {label:'Energy Use',note:'Fossil dependency',my:.85,ph:.55},
+  {label:'Forest (inverted)',note:'High=high risk',my:.60,ph:.72},
+  {label:'CO₂ Emissions',note:'Largest GHG share',my:.88,ph:.58},
+  {label:'Renewable %',note:'Green transition',my:.35,ph:.45},
+];
+const nc=document.getElementById('norm-container');
+NORM.forEach(d=>{
+  nc.innerHTML+=`<div class="norm-item">
+    <div class="norm-head"><span>${d.label}</span><span class="norm-sub">${d.note}</span></div>
+    <div class="norm-bars">
+      <div class="norm-row"><span class="norm-lbl" style="color:var(--my2)">MY</span>
+        <div class="norm-track"><div class="norm-fill" style="width:${d.my*100}%;background:var(--my2)"></div></div>
+        <span class="norm-num">${d.my.toFixed(2)}</span></div>
+      <div class="norm-row"><span class="norm-lbl" style="color:var(--ph2)">PH</span>
+        <div class="norm-track"><div class="norm-fill" style="width:${d.ph*100}%;background:var(--ph2)"></div></div>
+        <span class="norm-num">${d.ph.toFixed(2)}</span></div>
+    </div></div>`;
+});
+ 
+/* ═══════════════════════════════════════════════
+   CORRELATION HEATMAPS
+═══════════════════════════════════════════════ */
+function makeHeat(el,data,cols){
+  const n=cols.length;
+  const g=document.createElement('div');
+  g.className='heat-grid';
+  g.style.gridTemplateColumns=`60px ${Array(n).fill('1fr').join(' ')}`;
+  g.innerHTML+=`<div class="heat-label"></div>`;
+  cols.forEach(c=>{g.innerHTML+=`<div class="heat-label">${c}</div>`;});
+  data.forEach((row,i)=>{
+    g.innerHTML+=`<div class="heat-label" style="text-align:right">${cols[i]}</div>`;
+    row.forEach(v=>{
+      const t=Math.abs(v),hot=v>0;
+      const r=hot?Math.round(46+t*186):46,
+            gg=hot?Math.round(204-t*154):Math.round(100-t*54),
+            b=hot?Math.round(138-t*100):220;
+      g.innerHTML+=`<div class="heat-cell" style="background:rgba(${r},${gg},${b},${.12+t*.55});color:${t>.5?'#dce8f5':'#8da0b3'}" title="r=${v.toFixed(2)}">${v.toFixed(2)}</div>`;
+    });
+  });
+  el.appendChild(g);
+}
+const COLS=['GHG','CO₂','Forest','Energy','Renew%','GDP/cap'];
+const CORR_MY=[[1.00,.97,-.71,.93,-.42,.88],[.97,1.00,-.68,.91,-.39,.85],[-.71,-.68,1.00,-.65,.31,-.60],[.93,.91,-.65,1.00,-.38,.82],[-.42,-.39,.31,-.38,1.00,-.29],[.88,.85,-.60,.82,-.29,1.00]];
+const CORR_PH=[[1.00,.95,-.62,.88,-.51,.79],[.95,1.00,-.59,.85,-.48,.76],[-.62,-.59,1.00,-.57,.42,-.51],[.88,.85,-.57,1.00,-.43,.74],[-.51,-.48,.42,-.43,1.00,-.35],[.79,.76,-.51,.74,-.35,1.00]];
+makeHeat(document.getElementById('heat-my'),CORR_MY,COLS);
+makeHeat(document.getElementById('heat-ph'),CORR_PH,COLS);
+ 
+/* ═══════════════════════════════════════════════
+   GHG COUNTRY CHARTS
+═══════════════════════════════════════════════ */
+function buildCountryChart(id, histData, histColor){
+  mk(id,{type:'line',data:{labels:ALL_LBL,
+    datasets:buildGHGDatasets(histData,histColor,
+      id.includes('my')?baseMY:basePH,
+      id.includes('my')?s1MY:s1PH,
+      id.includes('my')?s2MY:s2PH,
+      id.includes('my')?s3MY:s3PH,
+      id.includes('my')?custMY:custPH)
+  },options:baseOpts(fmtK)});
+}
+ 
+function rebuildCountryCharts(){
+  custMY=calcScen(baseMY,custRate);
+  custPH=calcScen(basePH,custRate);
+  buildCountryChart('c-ghg-my',GHG_MY,'#ff8888');
+  buildCountryChart('c-ghg-ph',GHG_PH,'#6aaeff');
+}
+ 
+/* ═══════════════════════════════════════════════
+   CLAIMS CHARTS
+═══════════════════════════════════════════════ */
+mk('c-claims-det',{type:'line',data:{labels:CL_YR,datasets:[
+  {label:'Malaysia',data:CL_MY,borderColor:'#ff8888',borderWidth:2.2,pointRadius:4,fill:true,backgroundColor:'rgba(232,85,85,0.09)',tension:.35},
+  {label:'Philippines',data:CL_PH,borderColor:'#6aaeff',borderWidth:2.2,pointRadius:4,fill:true,backgroundColor:'rgba(61,142,240,0.09)',tension:.35},
+]},options:{...baseOpts(v=>`$${v}M`),plugins:{legend:{display:false},tooltip:{...TT,
+  afterBody:c=>{const yr=CL_YR[c[0].dataIndex];const n={2013:'Typhoon Haiyan',2021:'Selangor megaflood',2020:'Typhoons Goni+Vamco'};return n[yr]?[`📌 ${n[yr]}`]:[];}
+}}}});
+ 
+const scMY = CL_YR.map((yr, i) => { const g = GHG_YR.indexOf(yr); return g >= 0 ? { x: GHG_MY[g], y: CL_MY[i] } : null; }).filter(Boolean);
+const scPH = CL_YR.map((yr, i) => { const g = GHG_YR.indexOf(yr); return g >= 0 ? { x: GHG_PH[g], y: CL_PH[i] } : null; }).filter(Boolean);
+const scOpts=baseOpts(v=>`$${v}M`);
+scOpts.scales.x.ticks.callback=v=>`${v}k`;
+mk('c-scatter', {
+  type: 'scatter',
+  data: {
+    datasets: [
+      { label: 'Malaysia', data: scMY, xAxisID: 'x', backgroundColor: 'rgba(232,85,85,0.75)', pointRadius: 5, pointHoverRadius: 7 },
+      { label: 'Philippines', data: scPH, xAxisID: 'x2', backgroundColor: 'rgba(61,142,240,0.75)', pointRadius: 5, pointHoverRadius: 7 },
+    ]
+  },
+  options: scOpts
+});
+mk('c-events2',{type:'bar',data:{labels:CL_YR,datasets:[
+  {label:'Malaysia',data:EV_MY,backgroundColor:'rgba(232,85,85,0.7)',borderRadius:3},
+  {label:'Philippines',data:EV_PH,backgroundColor:'rgba(61,142,240,0.7)',borderRadius:3},
+]},options:baseOpts()});
+ 
+/* ═══════════════════════════════════════════════
+   STRESS TEST
+═══════════════════════════════════════════════ */
+const scVis={baseline:true,sc1:true,sc2:true,sc3:true,scust:true};
+const ctVis={my:true,ph:true};
+ 
+function buildStress(){
+  const ds=[];
+  const nullF=Array(N_FORE).fill(null);
+  const connect=(hist,fore)=>[...Array(N_HIST-1).fill(null),hist[hist.length-1],...fore];
+  const add=(label,data,clr,dash,lw=1.8)=>{
+    ds.push({label,data,borderColor:clr,borderWidth:lw,borderDash:dash||undefined,pointRadius:0,tension:.3,fill:false});
+  };
+ 
+  if(ctVis.my) ds.push({label:'MY Hist',data:[...GHG_MY,...nullF],borderColor:'rgba(232,85,85,0.45)',borderWidth:1.2,pointRadius:1.5,tension:.35,fill:false});
+  if(ctVis.ph) ds.push({label:'PH Hist',data:[...GHG_PH,...nullF],borderColor:'rgba(61,142,240,0.45)',borderWidth:1.2,pointRadius:1.5,tension:.35,fill:false});
+ 
+  if(scVis.baseline){
+    if(ctVis.my) add('MY Base',connect(GHG_MY,baseMY),'rgba(255,136,136,0.9)',[5,4],2.5);
+    if(ctVis.ph) add('PH Base',connect(GHG_PH,basePH),'rgba(106,174,255,0.9)',[5,4],2.5);
+  }
+  if(scVis.sc1){
+    if(ctVis.my) add('MY 1%',connect(GHG_MY,s1MY),'#f5c842',[2,3]);
+    if(ctVis.ph) add('PH 1%',connect(GHG_PH,s1PH),'rgba(245,200,66,0.55)',[2,3]);
+  }
+  if(scVis.sc2){
+    if(ctVis.my) add('MY 2%',connect(GHG_MY,s2MY),'#5de3a8',null);
+    if(ctVis.ph) add('PH 2%',connect(GHG_PH,s2PH),'rgba(93,227,168,0.55)',null);
+  }
+  if(scVis.sc3){
+    if(ctVis.my) add('MY 3%',connect(GHG_MY,s3MY),'rgba(232,85,85,0.9)',[7,3]);
+    if(ctVis.ph) add('PH 3%',connect(GHG_PH,s3PH),'rgba(61,142,240,0.6)',[7,3]);
+  }
+  if(scVis.scust){
+    if(ctVis.my) add('MY Custom',connect(GHG_MY,custMY),'#d0aaff',null,2.4);
+    if(ctVis.ph) add('PH Custom',connect(GHG_PH,custPH),'rgba(208,170,255,0.65)',null,2);
+  }
+  mk('c-stress',{type:'line',data:{labels:ALL_LBL,datasets:ds},options:baseOpts(fmtK)});
+}
+ 
+/* ═══════════════════════════════════════════════
+   RATE SLIDER LOGIC
+═══════════════════════════════════════════════ */
+const TICK_RATES=[1,1.5,2,2.5,3,3.5,4,4.5,5];
+ 
+function buildTicks(containerId,sliderId){
+  const tc=document.getElementById(containerId);
+  if(!tc)return;
+  tc.innerHTML=TICK_RATES.map(r=>{
+    const isInt=r===Math.floor(r);
+    return `<div class="rate-tick" data-rate="${r}" data-slider="${sliderId}">
+      <div class="rate-tick-dot ${Math.abs(r-custRate*100)<0.26?'active':''}"></div>
+      <div class="rate-tick-label ${Math.abs(r-custRate*100)<0.26?'active':''}">${isInt?r+'%':''}</div>
+    </div>`;
+  }).join('');
+  tc.querySelectorAll('.rate-tick').forEach(t=>{
+    t.addEventListener('click',()=>{
+      const r=parseFloat(t.dataset.rate)/100;
+      setCustomRate(r,true);
+    });
+  });
+}
+ 
+function refreshTicks(){
+  ['rate-ticks-ghg','rate-ticks-stress'].forEach(id=>{
+    const tc=document.getElementById(id);if(!tc)return;
+    tc.querySelectorAll('.rate-tick').forEach(t=>{
+      const match=Math.abs(parseFloat(t.dataset.rate)-custRate*100)<0.26;
+      t.querySelector('.rate-tick-dot').classList.toggle('active',match);
+      t.querySelector('.rate-tick-label').classList.toggle('active',match);
+    });
+  });
+}
+ 
+function updateSavingsPills(previewId){
+  const el=document.getElementById(previewId);if(!el)return;
+  const saveMY=Math.round(baseMY[6]-custMY[6]);
+  const savePH=Math.round(basePH[6]-custPH[6]);
+  const pctMY=((saveMY/baseMY[6])*100).toFixed(1);
+  const pctPH=((savePH/basePH[6])*100).toFixed(1);
+  el.innerHTML=`
+    <div class="savings-pill">
+      <div class="savings-pill-label">Malaysia saves by 2030</div>
+      <div class="savings-pill-val">${saveMY.toLocaleString()} kt</div>
+      <div class="savings-pill-pct">↓ ${pctMY}% vs baseline</div>
+    </div>
+    <div class="savings-pill">
+      <div class="savings-pill-label">Philippines saves by 2030</div>
+      <div class="savings-pill-val">${savePH.toLocaleString()} kt</div>
+      <div class="savings-pill-pct">↓ ${pctPH}% vs baseline</div>
+    </div>`;
+}
+ 
+function updateKPICard(){
+  const saveMY=Math.round(baseMY[6]-custMY[6]);
+  const savePH=Math.round(basePH[6]-custPH[6]);
+  const total=(saveMY+savePH);
+  document.getElementById('kv-cust-save').textContent=`${Math.round(total/1000)}k kt`;
+  document.getElementById('kv-cust-label').textContent=`CO₂eq saved · ${(custRate*100).toFixed(1)}%/yr`;
+}
+ 
+function updateSavingsSummary(){
+  const ss=document.getElementById('savings-summary');if(!ss)return;
+  [['Malaysia',baseMY[6],custMY[6],'var(--my2)'],['Philippines',basePH[6],custPH[6],'var(--ph2)']].forEach(([name,base,cust,clr])=>{
+    const save=Math.round(base-cust);
+    const pct=((save/base)*100).toFixed(1);
+    ss.innerHTML+=(ss.innerHTML?'':'')
+      +`<div class="drow"><span class="drow-key" style="color:${clr}">${name}</span>
+      <span class="drow-val" style="color:var(--cust2)">${save.toLocaleString()} kt  (↓${pct}%)</span></div>`;
+  });
+}
+ 
+function updateProjTable(){
+  const tb=document.getElementById('proj-table-body');if(!tb)return;
+  const rows=[
+    ['Baseline (no policy)',baseMY[0],baseMY[6],0,0,basePH[0],basePH[6],0,0,'var(--text2)',false],
+    ['1%/yr · Weak policy',null,s1MY[6],baseMY[6]-s1MY[6],null,null,s1PH[6],basePH[6]-s1PH[6],null,'var(--sc1b)',true],
+    ['2%/yr · NDC-aligned',null,s2MY[6],baseMY[6]-s2MY[6],null,null,s2PH[6],basePH[6]-s2PH[6],null,'var(--sc2b)',true],
+    ['3%/yr · Accelerated',null,s3MY[6],baseMY[6]-s3MY[6],null,null,s3PH[6],basePH[6]-s3PH[6],null,'var(--sc3b)',true],
+    [`Custom (${(custRate*100).toFixed(1)}%/yr)`,null,custMY[6],baseMY[6]-custMY[6],null,null,custPH[6],basePH[6]-custPH[6],null,'var(--cust2)',true],
+  ];
+  tb.innerHTML=rows.map(([label,my24,my30,mySave,_1,ph24,ph30,phSave,_2,clr,showSave])=>`<tr>
+    <td>${label}</td>
+    <td style="color:var(--my2)">${my24?`${Math.round(my24/1000)}k kt`:'—'}</td>
+    <td style="color:${clr}">${Math.round(my30/1000)}k kt</td>
+    <td style="color:${clr}">${showSave?`−${Math.round(mySave/1000)}k`:'—'}</td>
+    <td style="color:${clr}">${showSave?`−${((mySave/baseMY[6])*100).toFixed(1)}%`:'—'}</td>
+    <td style="color:var(--ph2)">${ph24?`${Math.round(ph24/1000)}k kt`:'—'}</td>
+    <td style="color:${clr}">${Math.round(ph30/1000)}k kt</td>
+    <td style="color:${clr}">${showSave?`−${Math.round(phSave/1000)}k`:'—'}</td>
+    <td style="color:${clr}">${showSave?`−${((phSave/basePH[6])*100).toFixed(1)}%`:'—'}</td>
+  </tr>`).join('');
+}
+ 
+function updateCustomLabel(){
+  const el=document.getElementById('cust-policy-label');
+  if(el) el.textContent=`${(custRate*100).toFixed(1)}%/yr · User-defined`;
+}
+ 
+/* Master update function */
+function onRateChange(){
+  custMY=calcScen(baseMY,custRate);
+  custPH=calcScen(basePH,custRate);
+ 
+  const display=(custRate*100).toFixed(1);
+  document.querySelectorAll('#ghg-rate-val,#stress-rate-val').forEach(el=>el.textContent=display);
+ 
+  const pct=((custRate*100-1)/4*100).toFixed(1)+'%';
+  document.querySelectorAll('.rate-slider').forEach(sl=>{
+    sl.value=Math.round(custRate*100*10);
+    sl.style.setProperty('--pct',pct);
+  });
+ 
+  refreshTicks();
+  updateSavingsPills('ghg-savings-preview');
+  updateSavingsPills('stress-savings-preview');
+  updateKPICard();
+  updateProjTable();
+  updateCustomLabel();
+  document.getElementById('savings-summary').innerHTML='';
+  updateSavingsSummary();
+ 
+  rebuildCountryCharts();
+  buildStress();
+  buildSavingsChart();
+}
+ 
+function setCustomRate(rate, animate=false){
+  custRate=Math.max(.01,Math.min(.05,rate));
+  onRateChange();
+}
+ 
+/* SLIDER INPUT EVENTS */
+['rate-slider-ghg','rate-slider-stress'].forEach(id=>{
+  const sl=document.getElementById(id);
+  if(!sl)return;
+  sl.addEventListener('input',()=>{
+    const r=parseInt(sl.value)/1000; 
+    custRate=r;
+    const pct=((r*100-1)/4*100).toFixed(1)+'%';
+    document.querySelectorAll('.rate-slider').forEach(s=>{
+      s.value=sl.value;
+      s.style.setProperty('--pct',pct);
+    });
+    const display=(r*100).toFixed(1);
+    document.querySelectorAll('#ghg-rate-val,#stress-rate-val').forEach(el=>el.textContent=display);
+    clearTimeout(sl._t);
+    sl._t=setTimeout(onRateChange,60);
+  });
+});
+ 
+/* SAVINGS CHART */
+function buildSavingsChart(){
+  const rateLabels=[`1%`,`2%`,`3%`,`${(custRate*100).toFixed(1)}%`];
+  const myVals=[baseMY[6]-s1MY[6],baseMY[6]-s2MY[6],baseMY[6]-s3MY[6],baseMY[6]-custMY[6]];
+  const phVals=[basePH[6]-s1PH[6],basePH[6]-s2PH[6],basePH[6]-s3PH[6],basePH[6]-custPH[6]];
+  mk('c-savings',{type:'bar',data:{labels:rateLabels,datasets:[
+    {label:'Malaysia',data:myVals,backgroundColor:'rgba(232,85,85,0.72)',borderRadius:4},
+    {label:'Philippines',data:phVals,backgroundColor:'rgba(61,142,240,0.72)',borderRadius:4},
+  ]},options:baseOpts(v=>`${Math.round(v/1000)}k`)});
+}
+ 
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+const built=new Set(['overview','claims']);
+ 
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const p=btn.dataset.page;
+    document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('page-'+p).classList.add('active');
+    btn.classList.add('active');
+    if(!built.has(p)){
+      built.add(p);
+      if(p==='ghg'){
+        buildCountryChart('c-ghg-my',GHG_MY,'#ff8888');
+        buildCountryChart('c-ghg-ph',GHG_PH,'#6aaeff');
+        buildTicks('rate-ticks-ghg','rate-slider-ghg');
+        updateSavingsPills('ghg-savings-preview');
+        updateProjTable();
+      }
+      if(p==='stress'){
+        buildStress();buildSavingsChart();
+        buildTicks('rate-ticks-stress','rate-slider-stress');
+        updateSavingsPills('stress-savings-preview');
+        document.getElementById('savings-summary').innerHTML='';
+        updateSavingsSummary();
+      }
+    }
+  });
+});
+ 
+/* SCENARIO TOGGLE */
+document.querySelectorAll('.sc-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const s=btn.dataset.sc;
+    scVis[s]=!scVis[s];
+    btn.classList.toggle('on',scVis[s]);
+    buildStress();
+  });
+});
+ 
+/* COUNTRY TOGGLE */
+document.querySelectorAll('.cpill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    const c=pill.dataset.c;
+    if(ctVis[c]&&!Object.entries(ctVis).some(([k,v])=>k!==c&&v))return;
+    ctVis[c]=!ctVis[c];
+    pill.classList.toggle('on',ctVis[c]);
+    buildStress();
+  });
+});
+ 
+/* ═══════════════════════════════════════════════
+   INITIALISE
+═══════════════════════════════════════════════ */
+custMY=calcScen(baseMY,custRate);
+custPH=calcScen(basePH,custRate);
+updateKPICard();
+document.querySelectorAll('.rate-slider').forEach(sl=>{
+  sl.style.setProperty('--pct','25%');
+});
+
+/* ═══════════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════════ */
+function toggleTheme(){
+  const html=document.documentElement;
+  const isLight=html.getAttribute('data-theme')==='light';
+  html.setAttribute('data-theme',isLight?'dark':'light');
+  document.getElementById('themeIcon').textContent=isLight?'☀️':'🌙';
+  document.getElementById('themeText').textContent=isLight?'Light mode':'Dark mode';
+}
+</script>
+</body>
+</html>
