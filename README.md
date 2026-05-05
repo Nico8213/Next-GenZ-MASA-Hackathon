@@ -32,12 +32,13 @@ This project develops a quantitative climate risk framework for a reinsurance fi
 
 ```plaintext
 .
-├── climate_risk_report.pdf           # Final 10-page research report
-├── climate_risk_analysis.py          # Primary Python script for modeling
-├── climate_risk_dashboard.html       # Interactive visualization dashboard
-├── README.md                         # Project documentation
+├── NextGenZ_report.pdf                                 # Final 10-page research report
+├── temp final.py                                       # Primary Python script for modeling
+├── climate_risk_dashboard_sea 8 final.html             # Interactive visualization dashboard
+├── climate_risk_dashboard_sea 8final.pbix              # Power BI
+├── README.md                                           # Project documentation
 └── Data/
-    └── WB_WDI_WIDEF.csv              # World Bank WDI raw dataset
+    └── WB_WDI_WIDEF.csv                                # World Bank WDI raw dataset
 ```
 
 ---
