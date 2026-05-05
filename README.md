@@ -22,9 +22,9 @@ This project develops a quantitative climate risk framework for a reinsurance fi
 | Name | Role & Responsibility | Contact |
 | :--- | :--- | :--- |
 | **Nicole Ng Zhen Tiing** | Project Lead & Data Scientist | qpngjll607706@gmail.com |
-| **CHAN XIN EN** | Literature Research & Risk Assessment | xinen2811@gmail.com |
+| **CHAN XIN EN** | Report Formatting & Visual Optimization | xinen2811@gmail.com |
 | **VEANN FOO WEI LING** | Copywriting & Data Collection | veann090909@gmail.com |
-| **AUSTIN KHO QI ZHANG** | Report Formatting & Visual Optimization | happy.family3266@gmail.com |
+| **AUSTIN KHO QI ZHANG** | Literature Research & Risk Assessment | happy.family3266@gmail.com |
 
 ---
 
