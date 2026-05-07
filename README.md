@@ -116,7 +116,7 @@ python climate_risk_analysis.py
 
 ## 8. AI Disclosure
 
-This project utilized generative AI *(Gemini 3 Flash)* for initial code scaffolding and document structure refinement. All statistical logic, data interpretations, and final model tuning were performed and verified manually by the NextGenz team to ensure accuracy and compliance with MASA Hackathon standards.
+This project utilized generative AI *(Gemini 1.5 Flash)* for initial code scaffolding and document structure refinement. All statistical logic, data interpretations, and final model tuning were performed and verified manually by the NextGenz team to ensure accuracy and compliance with MASA Hackathon standards.
 
 ---
 
